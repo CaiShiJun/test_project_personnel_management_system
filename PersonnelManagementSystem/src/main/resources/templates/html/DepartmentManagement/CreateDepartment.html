@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+		<link th:href="@{https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.css}" rel="stylesheet">
+		<script th:src="@{/js/jquery-3.2.0.js}"></script>
+		<script th:src="@{/js/bootstrap.min.js}"></script>
+
+		<!-- MultiLevelPushMenu 用-->
+		<link th:href="@{../favicon.ico}" rel="shortcut icon">
+		<link th:href="@{/css/MultiLevelPushMenu/normalize.css}" rel="stylesheet">
+		<link th:href="@{/css/MultiLevelPushMenu/demo.css}" rel="stylesheet">
+		<link th:href="@{/css/MultiLevelPushMenu/icons.css}" rel="stylesheet">
+		<link th:href="@{/css/MultiLevelPushMenu/component.css}" rel="stylesheet">
+		<script th:src="@{/js/MultiLevelPushMenu/modernizr.custom.js}"></script>
+		<script th:src="@{/js/MultiLevelPushMenu/classie.js}"></script>
+		<script th:src="@{/js/MultiLevelPushMenu/mlpushmenu.js}"></script>
+		<!-- MultiLevelPushMenu end -->
+
+		<!-- zTree用 -->
+		<link th:href="@{/css/ztree/zTreeStyle.css}" rel="stylesheet">
+		<script th:src="@{/js/ztree/jquery.ztree.all.js}"></script>
+		<!-- zTree end -->
+
+		<title>部门管理-新建部门</title>
+		<script>
+			/* zTree插件初始化用设置 start */
+			var zTreeObj;		//声明一个zTree对象变量
+			// zTree 的参数配置，深入使用请参考 API 文档（setting 配置详解）
+			var departmentListSetting = {
+				async:{
+					enable: true,		//设置 zTree 是否开启异步加载模式
+					contentType: "application/x-www-form-urlencoded",		//Ajax 提交参数的数据类型。
+					url: "/PersonnelManagementSystem/DepartmentManagement/CreateDepartment/initDepartmentTree",		//Ajax 获取数据的 URL 地址。
+					type: "post",		//Ajax 的 http 请求模式。
+					//autoParam: ["deptId"],		//异步加载时需要自动提交父节点属性的参数。
+					dataFilter: ajaxDataFilter,		//用于对 Ajax 返回数据进行预处理的函数。
+					dataType: "text"		//Ajax 获取的数据类型。
+					/* dataFilter: function(treeId, parentNode, responseData) {
+						if(responseData) {
+							for(var i = 0; i < responseData.length; i++) {
+								responseData[i].iconSkin = responseData[i].resClass;
+							}
+						}
+						return responseData;
+					} */
+				},
+				data: {
+					simpleData: {
+						enable: true,		//true / false 分别表示 使用 / 不使用 简单数据模式
+						idKey: "deptId",		//节点数据中保存唯一标识的属性名称。
+						pIdKey: "deptSupdeptId",		//节点数据中保存其父节点唯一标识的属性名称。
+						rootPId: null		//用于修正根节点父节点数据，即 pIdKey 指定的属性值。
+					}
+				},
+				view: {
+					selectedMulti: false,	//true / false 分别表示 支持 / 不支持 同时选中多个节点
+					dblClickExpand: false	//双击节点时，是否自动展开父节点的标识。true / false 分别表示双击节点 切换 / 不切换 展开状态。
+				},
+				check: {
+					enable: true,		//true / false 分别表示 显示 / 不显示 复选框或单选框
+					chkStyle: "radio",		//chkStyle = "checkbox" 时，显示 checkbox 选择框，setting.check.chkboxType 属性有效。 chkStyle = "radio" 时，显示 radio 选择框， setting.check.radioType 属性有效。
+					radioType: "all"		//radioType = "level" 时，在每一级节点范围内当做一个分组。 radioType = "all" 时，在整棵树范围内当做一个分组。
+				},
+				callback: {
+					//回调函数
+				}
+			};
+			
+
+			//var departmentListSetting = {dataFilter: ajaxDataFilter用于对 Ajax 返回数据进行预处理的函数。
+			function ajaxDataFilter(treeId, parentNode, responseData) {
+			    if (responseData) {
+			      for(var i =0; i < responseData.length; i++) {
+			        responseData[i].name = responseData[i].deptName;
+			      }
+			    }
+			    return responseData;
+			};
+			
+			/* zTree插件初始化用设置 end */
+			
+			/* 初始化部门类型多选框 start */
+			function initDeptTypeOption(){
+				$.ajax({
+	                type: "POST",
+	                url: "/PersonnelManagementSystem/DepartmentManagement/CreateDepartment/initDeptTypeOption",
+	                success: function (data) {
+	                	var deptTypeCodeSelect = $("#deptTypeCode");
+	                	for(var i = 0 ;i < data.length;i++){
+	                		deptTypeCodeSelect.append("<option value='"+data[i].code+"'>"+data[i].name+"</option>");
+			        	}
+	                }
+
+	            });
+			}
+			/* 初始化部门类型多选框 end */
+			
+			$(function() {
+				//初始化左侧菜单栏
+				new mlPushMenu(document.getElementById('mp-menu'), document.getElementById('trigger'));
+
+				//初始化zTree插件
+				zTreeObj = $.fn.zTree.init($("#treeDemo"), departmentListSetting);
+
+				//初始化部门类型多选框
+				initDeptTypeOption();
+				
+			});
+
+			$(function() {
+
+				//提交form表单之前调用。
+				$("form").submit(function(){
+					var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+					var nodes = zTree.getCheckedNodes(true);
+					$("#deptSupdeptId").val(nodes[0].deptId);
+				});
+				
+			});
+		</script>
+	</head>
+
+	<body>
+
+		<div id="component_pagehead" th:insert="~{thymeleaf-component/pagehead :: pagehead}"></div>
+		<div id="component_pageleftmenu" th:insert="~{thymeleaf-component/pageleftmenu :: pageleftmenu}"></div>
+
+		<div style="margin-top:50px;">
+			<div style="width: 100%;">
+				<div class="container">
+					<div class="row clearfix">
+						<div class="col-md-4 column">
+						</div>
+
+						<div class="col-md-6 column">
+							<div th:if="*{createDepartmentSaveResult} == 'success'" class="alert alert-success">新建部门成功！很好地完成了提交。</div>
+							<div th:if="*{createDepartmentSaveResult} == 'fail'" class="alert alert-danger">新建部门失败！请进行一些更改。</div>
+							<h3>
+								部门管理-新建部门
+							</h3>
+							<hr>
+							<form role="form" action="/PersonnelManagementSystem/DepartmentManagement/CreateDepartment/submit" method="post" id="createDepartmentSubmit">
+
+								<div class="form-group">
+									<label for="deptName">新部门名称：</label>
+									<input type="text" class="form-control" id="deptName" name="deptName" />
+								</div>
+
+								<div class="form-group">
+									<label for="deptTypeCode">新部门类型：</label>
+									<select class="form-control" id="deptTypeCode" name="deptTypeCode" ></select>
+								</div>
+
+								<div class="form-group">
+									<label for="deptPhoneNumber">新部门电话：</label>
+									<input type="text" class="form-control" id="deptPhoneNumber" name="deptPhoneNumber" />
+								</div>
+
+								<div class="form-group">
+									<label for="deptFaxNumber">新部门传真：</label>
+									<input type="text" class="form-control" id="deptFaxNumber" name="deptFaxNumber"/>
+								</div>
+
+								<div class="form-group">
+									<label for="deptDescription">新部门描述：</label>
+									<input type="text" class="form-control" id="deptDescription" name="deptDescription"/>
+								</div>
+
+								<div class="form-group">
+									<label for="treeDemo">新部门上级部门：</label>
+									<div style="background: yellow;width: 100%;height: 100%">
+										<ul id="treeDemo" class="ztree"></ul>
+										<input type="hidden" name="deptSupdeptId" id="deptSupdeptId">
+									</div>
+								</div>
+
+								<div class="form-group">
+									<label for="deptCreateDate">成立日期：</label>
+									<input type="date" class="form-control" id="deptCreateDate" name="deptCreateDate" />
+								</div>
+
+								<div class="form-group" align="right">
+									<button type="submit" class="btn btn-default">提交</button>
+								</div>
+							</form>
+						</div>
+
+						<div class="col-md-2 column">
+						</div>
+
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</body>
+
+</html>

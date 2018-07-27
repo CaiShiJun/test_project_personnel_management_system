@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+		<script th:src="@{/js/jquery-3.2.0.js}"></script>
+		<script th:src="@{/js/bootstrap.min.js}"></script>
+		
+		<link th:href="@{https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.css}" rel="stylesheet">
+
+		<!-- MultiLevelPushMenu 用-->
+		<link th:href="@{../favicon.ico}" rel="shortcut icon">
+		<link th:href="@{/css/MultiLevelPushMenu/normalize.css}" rel="stylesheet">
+		<link th:href="@{/css/MultiLevelPushMenu/demo.css}" rel="stylesheet">
+		<link th:href="@{/css/MultiLevelPushMenu/icons.css}" rel="stylesheet">
+		<link th:href="@{/css/MultiLevelPushMenu/component.css}" rel="stylesheet">
+		<script th:src="@{/js/MultiLevelPushMenu/modernizr.custom.js}"></script>
+		<script th:src="@{/js/MultiLevelPushMenu/classie.js}"></script>
+		<script th:src="@{/js/MultiLevelPushMenu/mlpushmenu.js}"></script>
+		<!-- MultiLevelPushMenu end -->
+
+		<!-- jqGrid 用 start -->
+		<link th:href="@{/css/jqGrid/ui.jqgrid-bootstrap.css}" media="screen" rel="stylesheet">
+		<link th:href="@{/css/jqGrid/ui.jqgrid-bootstrap-ui.css}" media="screen" rel="stylesheet">
+		<link th:href="@{/css/jqGrid/ui.jqgrid.css}" media="screen" rel="stylesheet">
+		
+		<script th:src="@{/js/jqGrid/grid.locale-cn.js}"></script>
+		<script th:src="@{/js/jqGrid/jquery.jqGrid.js}"></script>
+		<!-- jqGrid 用 end -->
+		
+		<!-- jQueryUI 用 start -->
+		<link th:href="@{/css/jQueryUI/jquery-ui.css}" media="screen" rel="stylesheet">
+		<script th:src="@{/js/jQueryUI/jquery-ui.js}"></script>
+		<!-- jQueryUI 用 end -->
+		
+		<!-- zTree用 -->
+		<link th:href="@{/css/ztree/zTreeStyle.css}" rel="stylesheet">
+		<script th:src="@{/js/ztree/jquery.ztree.all.js}"></script>
+		<!-- zTree end -->
+		
+		<title>部门管理-查询部门</title>
+		
+		<script>
+		
+		/* zTree插件初始化用设置 start */
+		var zTreeObj;		//声明一个zTree对象变量
+		// zTree 的参数配置，深入使用请参考 API 文档（setting 配置详解）
+		var departmentListSetting = {
+			async:{
+				enable: true,		//设置 zTree 是否开启异步加载模式
+				contentType: "application/x-www-form-urlencoded",		//Ajax 提交参数的数据类型。
+				url: "/PersonnelManagementSystem/DepartmentManagement/CreateDepartment/initDepartmentTree",		//Ajax 获取数据的 URL 地址。
+				type: "post",		//Ajax 的 http 请求模式。
+				//autoParam: ["deptId"],		//异步加载时需要自动提交父节点属性的参数。
+				dataFilter: ajaxDataFilter,		//用于对 Ajax 返回数据进行预处理的函数。
+				dataType: "text"		//Ajax 获取的数据类型。
+				/* dataFilter: function(treeId, parentNode, responseData) {
+					if(responseData) {
+						for(var i = 0; i < responseData.length; i++) {
+							responseData[i].iconSkin = responseData[i].resClass;
+						}
+					}
+					return responseData;
+				} */
+			},
+			data: {
+				simpleData: {
+					enable: true,		//true / false 分别表示 使用 / 不使用 简单数据模式
+					idKey: "deptId",		//节点数据中保存唯一标识的属性名称。
+					pIdKey: "deptSupdeptId",		//节点数据中保存其父节点唯一标识的属性名称。
+					rootPId: null		//用于修正根节点父节点数据，即 pIdKey 指定的属性值。
+				}
+			},
+			view: {
+				selectedMulti: false,	//true / false 分别表示 支持 / 不支持 同时选中多个节点
+				dblClickExpand: false	//双击节点时，是否自动展开父节点的标识。true / false 分别表示双击节点 切换 / 不切换 展开状态。
+			},
+			check: {
+				enable: true,		//true / false 分别表示 显示 / 不显示 复选框或单选框
+				chkStyle: "radio",		//chkStyle = "checkbox" 时，显示 checkbox 选择框，setting.check.chkboxType 属性有效。 chkStyle = "radio" 时，显示 radio 选择框， setting.check.radioType 属性有效。
+				radioType: "all"		//radioType = "level" 时，在每一级节点范围内当做一个分组。 radioType = "all" 时，在整棵树范围内当做一个分组。
+			},
+			callback: {
+				//回调函数
+			}
+		};
+		
+
+		//var departmentListSetting = {dataFilter: ajaxDataFilter用于对 Ajax 返回数据进行预处理的函数。
+		function ajaxDataFilter(treeId, parentNode, responseData) {
+		    if (responseData) {
+		      for(var i =0; i < responseData.length; i++) {
+		        responseData[i].name = responseData[i].deptName;
+		      }
+		    }
+		    return responseData;
+		};
+		
+		/* zTree插件初始化用设置 end */
+		
+		//初始化修改部门页面
+		function departmentEditInitInfo(deptId){
+
+			$.ajax({
+                type: "POST",
+                url: "/PersonnelManagementSystem/DepartmentManagement/UpdateDepartment/select",
+                data: "deptId="+deptId,
+                success: function (data) {
+                    
+                	//部门编号
+                    	$("#deptIdModel").val(data.deptId);
+					//部门名称
+						$("#deptNameModel").val(data.deptName);
+					//部门类型
+						$("#deptTypeCodeModel option[selected='selected']").attr("selected","");
+						$("#deptTypeCodeModel option[value='"+data.deptTypeCode+"']").attr("selected","selected");
+                	//部门电话
+						$("#deptPhoneNumberModel").val(data.deptPhoneNumber);
+                	//部门传真
+						$("#deptFaxNumberModel").val(data.deptFaxNumber);
+					//部门描述
+						$("#deptDescriptionModel").val(data.deptDescription);
+                	//上级部门
+						$("#deptSupdeptIdModel").val(data.deptSupdeptId);
+						var nodes = zTreeObj.getNodes();
+						zTreeObj.checkNode(zTreeObj.getNodeByParam('deptId', data.deptSupdeptId), true);
+                	//成立日期
+						$("#deptCreateDateModel").val(getMyDate(data.deptCreateDate));
+                }
+
+            });
+			
+		}
+
+		$(function() {
+
+			//提交form表单之前调用。
+			$("#updateDepartmentSubmit").submit(function(){
+				var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+				var nodes = zTree.getCheckedNodes(true);
+				$("#deptSupdeptIdModel").val(nodes[0].deptId);
+			});
+			
+		});
+
+		//获得年月日      得到日期oTime  
+        function getMyDate(str){  
+            var oDate = new Date(str),  
+            oYear = oDate.getFullYear(),  
+            oMonth = oDate.getMonth()+1,  
+            oDay = oDate.getDate(),  
+            oHour = oDate.getHours(),  
+            oMin = oDate.getMinutes(),  
+            oSen = oDate.getSeconds(),  
+            //oTime = oYear +'-'+ getzf(oMonth) +'-'+ getzf(oDay) +' '+ getzf(oHour) +':'+ getzf(oMin) +':'+getzf(oSen);//最后拼接时间  	毫秒转换成 年月日+时分秒 格式的  1970-01-18 07:12:39   
+            oTime = oYear +'-'+ getzf(oMonth) +'-'+ getzf(oDay);	//最后拼接时间  	毫秒转换成 年月日 格式的  1970-01-18
+            return oTime;  
+        };  
+        //补0操作  
+        function getzf(num){  
+            if(parseInt(num) < 10){  
+                num = '0'+num;  
+            }  
+            return num;  
+        } 
+
+		/* ****************************************************************************** ******************************************************** */
+		
+		/* 初始化部门类型多选框 start */
+		function initDeptTypeOption(deptTypeCodeSelect){
+			$.ajax({
+                type: "POST",
+                url: "/PersonnelManagementSystem/DepartmentManagement/CreateDepartment/initDeptTypeOption",
+                success: function (data) {
+                	for(var i = 0 ;i < data.length;i++){
+                		deptTypeCodeSelect.append("<option value='"+data[i].code+"'>"+data[i].name+"</option>");
+		        	}
+                }
+
+            });
+		}
+		/* 初始化部门类型多选框 end */
+		
+		$(function() {
+			new mlPushMenu(document.getElementById('mp-menu'), document.getElementById('trigger'));
+
+			initDeptTypeOption($("#deptTypeCodeFrom"));
+
+			initDeptTypeOption($("#deptTypeCodeModel"));
+
+			//初始化zTree插件
+			zTreeObj = $.fn.zTree.init($("#treeDemo"), departmentListSetting);
+		});
+
+		//临时参考
+		$(document).ready(
+			function() {
+				jQuery("#departmentInfoGrid").jqGrid({
+					url: "/PersonnelManagementSystem/DepartmentManagement/SelectDepartment/initSelectDepartmentGrid", //获取数据的地址
+					subGrid: false, //是否使用suggrid
+					datatype: "json", //从服务器端返回的数据类型，默认xml。可选类型：xml，local，json，jsonnp，script，xmlstring，jsonstring，clientside
+					height: "100%", //表格高度，可以是数字，像素值或者百分比
+					colNames: [ '部门编号', '部门名称',   '类型代码' , '类型名称', '电话',  /*  '传真', */   /* '描述' ,*/ /*  '上级部门编号' , */  '上级部门名称', '成立日期' , '操作' ], //列显示名称，是一个数组对象
+					cellEdit: false, //启用或者禁用单元格编辑功能
+					styleUI: 'jQueryUI',		//jQueryUI、Bootstrap
+					colModel: [
+						{ //ColModel 是jqGrid里最重要的一个属性，设置表格列的属性。
+							name: 'deptId', //表格列的名称，所有关键字，保留字都不能作为名称使用包括subgrid, cb and rn.
+							index: 'deptId', //索引。其和后台交互的参数为sidx
+							width: 60, //默认列的宽度，只能是象素值，不能是百分比
+							align: "center",
+							hidden:true
+						}, 
+						{
+							name: 'deptName',
+							index: 'deptName',
+							width: 350,
+							align: "center"
+						},
+						{
+							name: 'deptTypeCode',
+							index: 'deptTypeCode',
+							width: 80,
+							sortable: true, //设置该字段是否进行排序 boolean true
+							sorttype: "int", //用在当datatype为local时，定义搜索列的类型，可选值：int/integer - 对integer排序float/number/currency - 排序数字date - 排序日期text - 排序文本
+							align: "center",
+							fixed: true, //列宽度是否要固定不可变
+							editable: false //单元格是否可编辑
+						}, 
+						{
+							name: 'deptTypeName',
+							index: 'deptTypeName',
+							width: 80,
+							align: "right",
+							sortable: true,
+							align: "center"
+						},
+						{
+							name: 'deptPhoneNumber',
+							index: 'deptPhoneNumber',
+							width: 150,
+							align: "center"
+						},
+						 /* {
+							name: 'deptFaxNumber',
+							index: 'deptFaxNumber',
+							width: 150,
+							align: "center"
+						},  */
+						/* {
+							name: 'deptDescription',
+							index: 'deptDescription',
+							width: 150,
+							align: "center"
+						}, */
+						/* {
+							name: 'deptSupdeptId',
+							index: 'deptSupdeptId',
+							width: 60,
+							sortable: true,
+							align: "center"
+						},  */
+						{
+							name: 'deptSupdeptName',
+							index: 'deptSupdeptName',
+							width: 250,
+							sortable: true,
+							align: "center"
+						},
+						{
+							name: 'deptCreateDate',
+							index: 'deptCreateDate',
+							width: 150,
+							sortable: true,
+							align: "center",
+							formatter : function(cellvalue, options, rowdata) {
+								return getMyDate(rowdata.deptCreateDate);
+							}
+						} ,
+						{
+							name: '操作',
+							index: '操作',
+							width: 100,
+							align: "center",
+							formatter : function(cellvalue, options, rowdata) {
+								var operationStr = '';
+								operationStr = operationStr + '<button style="font-size:12px" data-toggle="modal" data-target="#departmentEditModal" id="departmentEditButton" onclick="departmentEditInitInfo(\''+rowdata.deptId+'\')"><i class="fa fa-pencil-square" style="font-size:16px;color:red"></i></button>    ';
+								operationStr = operationStr + '<button style="font-size:12px"><i class="fa fa-trash" style="font-size:16px;color:red"></i></button>';
+								return operationStr;
+							}
+						} 
+					],
+					rowNum: 10, //在grid上显示记录条数，这个参数是要被传递到后台
+					rowList: [10, 20, 30], //一个下拉选择框，用来改变显示记录数，当选择时会覆盖rowNum参数传递到后台
+					pager: '#departmentInfoGridPager', //定义翻页用的导航栏，必须是有效的html元素。翻页工具栏可以放置在html页面任意位置
+					sortname: 'deptTypeCode', //默认的排序列。可以是列名称或者是一个数字，这个参数会被提交到后台
+					mtype: "POST", //ajax提交方式。POST或者GET，默认GET
+					viewrecords: true, //定义是否要显示总记录数
+					sortorder: "desc", //排序顺序，升序或者降序（asc or desc）
+					altRows: true, //设置表格 zebra-striped 值
+					multiselect: true, //定义是否可以多选
+					multiboxonly: false, //只有当multiselect = true.起作用，当multiboxonly 为ture时只有选择checkbox才会起作用
+					caption: "部门信息"
+				});
+
+				//navButtons
+				jQuery("#departmentInfoGrid").jqGrid('navGrid', "#departmentInfoGridPager", { //navbar options
+					edit : false,		//是否启用可编辑功能，当编辑时会触发事件editGridRow
+					editicon : 'ui-icon-pencil',	//设置编辑按钮的图标，只有UI theme里的图标才可以使用	
+					add : false,			//是否启用新增功能，当点击按钮时会触发editGridRow事件
+					addicon : 'ui-icon-circle-plus',		//给新增功能设置图标，只有UI theme里的图标才可以使用
+					del : false,			//是否启用删除功能，启用时会触发事件delGridRow
+					delicon : 'ui-icon-trash',			//设置删除按钮的图标，只有UI theme里的图标才可以使用
+					search : false,		//是否启用搜索按钮，会触发searchGrid 事件
+					searchicon : 'ui-icon-search',		//设置搜索按钮的图标，只有UI theme里的图标才可以使用
+					refresh : false,			//是否启用刷新按钮，当点击刷新按钮时会触发trigger(“reloadGrid”)事件，而且会清空搜索条件值
+					refreshicon : 'ui-icon-refresh',		//设置刷新图标，只有UI theme里的图标才可以使用
+					view : false,		//是否启用查看按钮，会触发事件viewGridRow
+					viewicon : 'ui-icon-info',			//设置查看按钮的图标，只有UI theme里的图标才可以使用
+				}).navButtonAdd('#departmentInfoGridPager', {	//caption：按钮名称，可以为空，string类型 //buttonicon：按钮的图标，string类型，必须为UI theme图标 //onClickButton：按钮事件，function类型，默认null //position：first或者last，按钮位置 //title：string类型，按钮的提示信息 //cursor：string类型，光标类型，默认为pointer //id：string类型，按钮id 
+					caption : "新增",
+					buttonicon : "ui-icon-circle-plus",
+					onClickButton : function() {
+						window.location = "/PersonnelManagementSystem/DepartmentManagement/CreateDepartment";
+					},
+					position : "last"
+				})
+
+				$(window).triggerHandler('resize.jqGrid'); //triggerHandler() 方法触发被选元素上指定的事件。
+
+			});
+
+
+			//查询按钮
+			function findSearch() {
+				var deptName = $("#deptNameFrom").val();
+				var deptTypeCode = $("#deptTypeCodeFrom").val();
+				var deptSupdeptName = $("#deptSupdeptNameFrom").val();
+				
+				$("#departmentInfoGrid").jqGrid('setGridParam', {
+					postData : {
+						'deptName' : deptName,
+						'deptTypeCode' : deptTypeCode,
+						'deptSupdeptName' : deptSupdeptName
+					} 
+				}).trigger("reloadGrid");	//发送数据
+			}
+			
+		</script>
+	</head>
+
+	<body>
+
+		<div id="component_pagehead" th:insert="~{thymeleaf-component/pagehead :: pagehead}"></div>
+		<div id="component_pageleftmenu" th:insert="~{thymeleaf-component/pageleftmenu :: pageleftmenu}"></div>
+
+		<div style="margin-top:50px;">
+
+			<!-- 查询部门列表：可以按照部门编号，名称，类型进行查询 -->
+			<div th:if="*{updateDepartmentUpdateResult} == 'success'" class="alert alert-success">修改部门成功！</div>
+			<div th:if="*{updateDepartmentUpdateResult} == 'fail'" class="alert alert-danger">修改部门失败！</div>
+
+			<div>
+				<div class="col-md-8 column" style="width: 80%;">
+					<div>
+						<h1>查询部门列表：可以按照部门编号，名称，类型进行查询</h1>
+						<table id="departmentInfoGrid"></table>
+						<div id="departmentInfoGridPager" style = "color: orange;"></div>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-4 column" style="width: 20%;">
+				<div class="page-header">
+					<h1>
+						查询部门列表 <small>：可以按照部门名称，部门类型，上级部门名称进行查询</small>
+					</h1>
+				</div>
+				<form role="form">
+					<div class="form-group">
+						<label for="deptNameFrom">部门名称</label>
+						<input type="text" class="form-control" id="deptNameFrom" name="deptName"/>
+					</div>
+					<div class="form-group">
+						<label for="deptTypeCodeFrom">部门类型</label>
+						<select class="form-control" id="deptTypeCodeFrom" name="deptTypeCode">
+      						<option value="0" selected="selected">全部类型</option>
+    					</select>
+					</div>
+					<div class="form-group">
+						<label for="deptSupdeptIdFrom">上级部门名称</label>
+						<input type="text" class="form-control" id="deptSupdeptNameFrom" name="deptSupdeptName"/>
+					</div>
+					
+					<button type="button" class="btn btn-default" onclick="findSearch();">查询</button>
+				</form>
+			</div>
+		</div>
+		
+		<!--  -->
+		<div class="modal fade" id="departmentEditModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="color: black;">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×
+						</button>
+						<h4 class="modal-title" id="myModalLabel">
+							部门修改
+						</h4>
+					</div>
+					<form role="form" action="/PersonnelManagementSystem/DepartmentManagement/UpdateDepartment/update" method="post" id="updateDepartmentSubmit">
+						<div class="modal-body">
+							<div class="form-group">
+								<!-- 部门编号 -->
+								<input type="hidden" class="form-control" id="deptIdModel" name="deptIdModel"/>
+							</div>
+							<div class="form-group">
+								<label for="deptNameModel">部门名称：</label>
+								<input type="text" class="form-control" id="deptNameModel" name="deptNameModel" />
+							</div>
+	
+							<div class="form-group">
+								<label for="deptTypeCodeModel">部门类型：</label>
+								<select class="form-control" id="deptTypeCodeModel" name="deptTypeCodeModel" ></select>
+							</div>
+	
+							<div class="form-group">
+								<label for="deptPhoneNumberModel">部门电话：</label>
+								<input type="text" class="form-control" id="deptPhoneNumberModel" name="deptPhoneNumberModel" />
+							</div>
+	
+							<div class="form-group">
+								<label for="deptFaxNumberModel">部门传真：</label>
+								<input type="text" class="form-control" id="deptFaxNumberModel" name="deptFaxNumberModel"/>
+							</div>
+	
+							<div class="form-group">
+								<label for="deptDescriptionModel">部门描述：</label>
+								<input type="text" class="form-control" id="deptDescriptionModel" name="deptDescriptionModel"/>
+							</div>
+	
+							<div class="form-group">
+								<label for="deptSupdeptIdModel">上级部门：</label>
+								<div style="width: 100%;height: 100%">
+									<ul id="treeDemo" class="ztree"></ul>
+									<input type="hidden" name="deptSupdeptIdModel" id="deptSupdeptIdModel">
+								</div>
+							</div>
+	
+							<div class="form-group">
+								<label for="deptCreateDateModel">成立日期：</label>
+								<input type="date" class="form-control" id="deptCreateDateModel" name="deptCreateDateModel" />
+							</div>
+	
+						</div>
+						<div class="modal-footer">
+							<button type="button" class="btn btn-default" data-dismiss="modal">
+								关闭
+							</button>
+							<button type="submit" class="btn btn-primary">
+								提交更改
+							</button>
+						</div>
+					</form>
+				</div><!-- /.modal-content -->
+			</div><!-- /.modal-dialog -->
+		</div><!-- /.modal -->
+
+	</body>
+
+</html>

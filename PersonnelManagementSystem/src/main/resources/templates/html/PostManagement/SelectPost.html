@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+		<link th:href="@{https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.css}" rel="stylesheet">
+		<script th:src="@{/js/jquery-3.2.0.js}"></script>
+		<script th:src="@{/js/bootstrap.min.js}"></script>
+		
+		<link th:href="@{https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.css}" rel="stylesheet">
+
+		<!-- MultiLevelPushMenu 用-->
+		<link th:href="@{../favicon.ico}" rel="shortcut icon">
+		<link th:href="@{/css/MultiLevelPushMenu/normalize.css}" rel="stylesheet">
+		<link th:href="@{/css/MultiLevelPushMenu/demo.css}" rel="stylesheet">
+		<link th:href="@{/css/MultiLevelPushMenu/icons.css}" rel="stylesheet">
+		<link th:href="@{/css/MultiLevelPushMenu/component.css}" rel="stylesheet">
+		<script th:src="@{/js/MultiLevelPushMenu/modernizr.custom.js}"></script>
+		<script th:src="@{/js/MultiLevelPushMenu/classie.js}"></script>
+		<script th:src="@{/js/MultiLevelPushMenu/mlpushmenu.js}"></script>
+		<!-- MultiLevelPushMenu end -->
+		
+		<!-- jqGrid 用 start -->
+		<link th:href="@{/css/jqGrid/ui.jqgrid-bootstrap.css}" media="screen" rel="stylesheet">
+		<link th:href="@{/css/jqGrid/ui.jqgrid-bootstrap-ui.css}" media="screen" rel="stylesheet">
+		<link th:href="@{/css/jqGrid/ui.jqgrid.css}" media="screen" rel="stylesheet">
+		
+		<script th:src="@{/js/jqGrid/grid.locale-cn.js}"></script>
+		<script th:src="@{/js/jqGrid/jquery.jqGrid.js}"></script>
+		<!-- jqGrid 用 end -->
+		
+		<!-- jQueryUI 用 start -->
+		<link th:href="@{/css/jQueryUI/jquery-ui.css}" media="screen" rel="stylesheet">
+		<script th:src="@{/js/jQueryUI/jquery-ui.js}"></script>
+		<!-- jQueryUI 用 end -->
+
+		<title>岗位管理-查询岗位</title>
+		<script>
+			$(function() {
+				new mlPushMenu(document.getElementById('mp-menu'), document.getElementById('trigger'));
+			});
+
+			//临时参考
+			$(document).ready(function() {
+				jQuery("#postInfoGrid").jqGrid({
+					url: "/PersonnelManagementSystem/PostManagement/initSelectPostGrid", //获取数据的地址
+					subGrid: false, //是否使用suggrid
+					datatype: "json", //从服务器端返回的数据类型，默认xml。可选类型：xml，local，json，jsonnp，script，xmlstring，jsonstring，clientside
+					height: "100%", //表格高度，可以是数字，像素值或者百分比
+					colNames: ['操作','岗位编号','岗位名称','岗位类型代码','岗位类型名称','岗位编制' ], //列显示名称，是一个数组对象
+					cellEdit: false, //启用或者禁用单元格编辑功能
+					styleUI: 'jQueryUI',		//jQueryUI、Bootstrap
+					colModel: [
+						{ //ColModel 是jqGrid里最重要的一个属性，设置表格列的属性。
+							name: '', //表格列的名称，所有关键字，保留字都不能作为名称使用包括subgrid, cb and rn.
+							index: '', //索引。其和后台交互的参数为sidx
+							width: 100, //默认列的宽度，只能是象素值，不能是百分比
+							align: "center",
+							formatter : function(cellvalue, options, rowdata) {
+								var operationStr = '';
+								operationStr = operationStr + '<button style="font-size:12px"><i class="fa fa-pencil-square" style="font-size:16px;color:red"></i></button>    ';
+								operationStr = operationStr + '<button style="font-size:12px"><i class="fa fa-trash" style="font-size:16px;color:red"></i></button>';
+								return operationStr;
+							}
+						},{ //ColModel 是jqGrid里最重要的一个属性，设置表格列的属性。
+							name: 'statId', //表格列的名称，所有关键字，保留字都不能作为名称使用包括subgrid, cb and rn.
+							index: 'statId', //索引。其和后台交互的参数为sidx
+							width: 250, //默认列的宽度，只能是象素值，不能是百分比
+							align: "center"
+						},{ //ColModel 是jqGrid里最重要的一个属性，设置表格列的属性。
+							name: 'statName', //表格列的名称，所有关键字，保留字都不能作为名称使用包括subgrid, cb and rn.
+							index: 'statName', //索引。其和后台交互的参数为sidx
+							width: 150, //默认列的宽度，只能是象素值，不能是百分比
+							align: "center"
+						},{ //ColModel 是jqGrid里最重要的一个属性，设置表格列的属性。
+							name: 'statTypeCode', //表格列的名称，所有关键字，保留字都不能作为名称使用包括subgrid, cb and rn.
+							index: 'statTypeCode', //索引。其和后台交互的参数为sidx
+							width: 100, //默认列的宽度，只能是象素值，不能是百分比
+							align: "center"
+						},{ //ColModel 是jqGrid里最重要的一个属性，设置表格列的属性。
+							name: 'statTypeName', //表格列的名称，所有关键字，保留字都不能作为名称使用包括subgrid, cb and rn.
+							index: 'statTypeName', //索引。其和后台交互的参数为sidx
+							width: 150, //默认列的宽度，只能是象素值，不能是百分比
+							align: "center"
+						},{ //ColModel 是jqGrid里最重要的一个属性，设置表格列的属性。
+							name: 'statSize', //表格列的名称，所有关键字，保留字都不能作为名称使用包括subgrid, cb and rn.
+							index: 'statSize', //索引。其和后台交互的参数为sidx
+							width: 100, //默认列的宽度，只能是象素值，不能是百分比
+							align: "center"
+						}
+					],
+					rowNum: 10, //在grid上显示记录条数，这个参数是要被传递到后台
+					rowList: [10, 20, 30], //一个下拉选择框，用来改变显示记录数，当选择时会覆盖rowNum参数传递到后台
+					pager: '#postInfoGridPager', //定义翻页用的导航栏，必须是有效的html元素。翻页工具栏可以放置在html页面任意位置
+					sortname: 'statTypeCode', //默认的排序列。可以是列名称或者是一个数字，这个参数会被提交到后台
+					mtype: "POST", //ajax提交方式。POST或者GET，默认GET
+					viewrecords: true, //定义是否要显示总记录数
+					sortorder: "desc", //排序顺序，升序或者降序（asc or desc）
+					altRows: true, //设置表格 zebra-striped 值
+					multiselect: true, //定义是否可以多选
+					multiboxonly: false, //只有当multiselect = true.起作用，当multiboxonly 为ture时只有选择checkbox才会起作用
+					caption: "岗位信息"
+				});
+
+				//navButtons
+				jQuery("#postInfoGrid").jqGrid('navGrid', "#postInfoGridPager", { //navbar options
+					edit : false,		//是否启用可编辑功能，当编辑时会触发事件editGridRow
+					editicon : 'ui-icon-pencil',	//设置编辑按钮的图标，只有UI theme里的图标才可以使用	
+					add : false,			//是否启用新增功能，当点击按钮时会触发editGridRow事件
+					addicon : 'ui-icon-circle-plus',		//给新增功能设置图标，只有UI theme里的图标才可以使用
+					del : false,			//是否启用删除功能，启用时会触发事件delGridRow
+					delicon : 'ui-icon-trash',			//设置删除按钮的图标，只有UI theme里的图标才可以使用
+					search : false,		//是否启用搜索按钮，会触发searchGrid 事件
+					searchicon : 'ui-icon-search',		//设置搜索按钮的图标，只有UI theme里的图标才可以使用
+					refresh : false,			//是否启用刷新按钮，当点击刷新按钮时会触发trigger(“reloadGrid”)事件，而且会清空搜索条件值
+					refreshicon : 'ui-icon-refresh',		//设置刷新图标，只有UI theme里的图标才可以使用
+					view : false,		//是否启用查看按钮，会触发事件viewGridRow
+					viewicon : 'ui-icon-info',			//设置查看按钮的图标，只有UI theme里的图标才可以使用
+				}).navButtonAdd("#postInfoGridPager", {	//caption：按钮名称，可以为空，string类型 //buttonicon：按钮的图标，string类型，必须为UI theme图标 //onClickButton：按钮事件，function类型，默认null //position：first或者last，按钮位置 //title：string类型，按钮的提示信息 //cursor：string类型，光标类型，默认为pointer //id：string类型，按钮id 
+					caption : "新增",
+					buttonicon : "ui-icon-circle-plus",
+					onClickButton : function() {
+						window.location = "/PersonnelManagementSystem/";
+					},
+					position : "last"
+				}).navButtonAdd("#postInfoGridPager", {	//caption：按钮名称，可以为空，string类型 //buttonicon：按钮的图标，string类型，必须为UI theme图标 //onClickButton：按钮事件，function类型，默认null //position：first或者last，按钮位置 //title：string类型，按钮的提示信息 //cursor：string类型，光标类型，默认为pointer //id：string类型，按钮id 
+					caption : "查询",
+					buttonicon : "ui-icon-search",
+					onClickButton : function() {
+						$('#myModal001TEST').modal('show');
+					},
+					position : "first"
+				});
+				
+				$(window).triggerHandler('resize.jqGrid'); //triggerHandler() 方法触发被选元素上指定的事件。
+			});
+		</script>
+	</head>
+
+	<body>
+
+		<div id="component_pagehead" th:insert="~{thymeleaf-component/pagehead :: pagehead}"></div>
+		<div id="component_pageleftmenu" th:insert="~{thymeleaf-component/pageleftmenu :: pageleftmenu}"></div>
+		<div style="margin-top:50px;">
+			<div class="container">
+				<div class="row clearfix">
+					<div class="col-md-12 column">
+						<div class="row clearfix">
+							<div class="col-md-12 column">
+								<table id="postInfoGrid"></table>
+								<div id="postInfoGridPager"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<!-- 模态框（Modal） -->
+			<div class="modal fade" id="myModal001TEST" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="color: black;">
+			    <div class="modal-dialog">
+			        <div class="modal-content">
+			            <div class="modal-header">
+			                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+			                <h4 class="modal-title" id="myModalLabel">岗位查询</h4>
+			            </div>
+			            <form class="form-inline" role="form">
+								<div class="form-group">
+									 <label for="exampleInputEmail1">岗位编号</label><input type="email" class="form-control" id="exampleInputEmail1" />
+								</div>
+								<div class="form-group">
+									 <label for="exampleInputPassword1">岗位名称</label><input type="password" class="form-control" id="exampleInputPassword1" />
+								</div>
+								<div class="form-group">
+									 <label for="exampleInputPassword1">岗位类型代码</label><input type="password" class="form-control" id="exampleInputPassword1" />
+								</div>
+								<div class="form-group">
+									 <label for="exampleInputPassword1">岗位类型名称</label><input type="password" class="form-control" id="exampleInputPassword1" />
+								</div>
+								<div class="form-group">
+									 <label for="exampleInputPassword1">岗位编制</label><input type="password" class="form-control" id="exampleInputPassword1" />
+								</div>
+				            <div class="modal-body">
+							</div>
+				            <div class="modal-footer">
+				                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+				                <button type="button" class="btn btn-primary">提交更改</button>
+				            </div>
+			            </form>
+			        </div><!-- /.modal-content -->
+			    </div><!-- /.modal -->
+			</div>
+			
+			
+			
+		</div>
+
+	</body>
+
+</html>

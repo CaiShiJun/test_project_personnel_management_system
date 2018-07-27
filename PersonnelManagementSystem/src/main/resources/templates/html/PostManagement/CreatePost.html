@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+		<link th:href="@{https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.css}" rel="stylesheet">
+		<script th:src="@{/js/jquery-3.2.0.js}"></script>
+		<script th:src="@{/js/bootstrap.min.js}"></script>
+
+		<!-- MultiLevelPushMenu 用-->
+		<link th:href="@{../favicon.ico}" rel="shortcut icon">
+		<link th:href="@{/css/MultiLevelPushMenu/normalize.css}" rel="stylesheet">
+		<link th:href="@{/css/MultiLevelPushMenu/demo.css}" rel="stylesheet">
+		<link th:href="@{/css/MultiLevelPushMenu/icons.css}" rel="stylesheet">
+		<link th:href="@{/css/MultiLevelPushMenu/component.css}" rel="stylesheet">
+		<script th:src="@{/js/MultiLevelPushMenu/modernizr.custom.js}"></script>
+		<script th:src="@{/js/MultiLevelPushMenu/classie.js}"></script>
+		<script th:src="@{/js/MultiLevelPushMenu/mlpushmenu.js}"></script>
+		<!-- MultiLevelPushMenu end -->
+
+		<title>岗位管理-增加岗位</title>
+		<script>
+			$(function() {
+				new mlPushMenu(document.getElementById('mp-menu'), document.getElementById('trigger'));
+			});
+		</script>
+	</head>
+
+	<body>
+
+		<div id="component_pagehead" th:insert="~{thymeleaf-component/pagehead :: pagehead}"></div>
+		<div id="component_pageleftmenu" th:insert="~{thymeleaf-component/pageleftmenu :: pageleftmenu}"></div>
+
+		<div style="margin-top:50px;">
+			
+		</div>
+
+	</body>
+
+</html>
